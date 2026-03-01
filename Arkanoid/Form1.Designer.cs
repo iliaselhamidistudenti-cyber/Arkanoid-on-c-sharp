@@ -238,7 +238,7 @@
             // palla
             // 
             palla.Image = Properties.Resources.pallina;
-            palla.Location = new Point(453, 420);
+            palla.Location = new Point(465, 330);
             palla.Name = "palla";
             palla.Size = new Size(14, 14);
             palla.SizeMode = PictureBoxSizeMode.AutoSize;
@@ -1085,7 +1085,6 @@
             bc7.SizeMode = PictureBoxSizeMode.StretchImage;
             bc7.TabIndex = 52;
             bc7.TabStop = false;
-            bc7.Click += pictureBox84_Click;
             // 
             // bc8
             // 

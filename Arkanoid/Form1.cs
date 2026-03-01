@@ -126,9 +126,6 @@ namespace Arkanoid
             };
             InizializzaBLocchi(false);
             SchermataIniziale();
-
-
-
         }
         private void button1_Click(object sender, EventArgs e)
         {
@@ -150,16 +147,6 @@ namespace Arkanoid
         private void button1_KeyUp(object sender, KeyEventArgs e)
         {
             keys = Keys.None;
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox84_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
