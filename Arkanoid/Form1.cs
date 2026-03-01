@@ -10,6 +10,7 @@ namespace Arkanoid
          * blocco rosso vale 20 punti
          * blocco verde vale 25 punti
          */
+        //carlo stupido
         public int speed = 3;
         Keys keys;
         PictureBox logo;
