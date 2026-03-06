@@ -1,4 +1,4 @@
-using Arkanoid.Properties;
+﻿using Arkanoid.Properties;
 
 namespace Arkanoid
 {
@@ -10,12 +10,14 @@ namespace Arkanoid
          * blocco rosso vale 20 punti
          * blocco verde vale 25 punti
          */
+        public int palla_velY = 2;
+        public int palla_velX = 2;
         public int speed = 3;
+        public bool game_over = false;
         Keys keys;
         PictureBox logo;
-        public bool collisione = false;
         List<PictureBox> Blocchi;
-        Random rnd = new Random();
+        Random rnd = new Random(Environment.TickCount);
         public Form1()
         {
             InitializeComponent();
@@ -63,50 +65,139 @@ namespace Arkanoid
             this.Controls.Add(logo);
             Barra.Visible = false;
             palla.Visible = false;
+            InizializzaBLocchi(false);
+            single_p.Visible = true;
+            game_over = false;
         }
         public record Movimento(int left, int right, int up, int down);
+        CancellationTokenSource pallaCTS;
+        public void Pallina_Movimento()
+        {
+            if (pallaCTS != null)
+            {
+                pallaCTS.Cancel();
+                pallaCTS.Dispose();
+            }
+            pallaCTS = new CancellationTokenSource();
+            var token = pallaCTS.Token;
+
+            IProgress<Movimento> segue = new Progress<Movimento>(
+                valore =>
+                {
+                    palla.Visible = true;
+                    palla.Left = Barra.Left + (Barra.Width / 2) - (palla.Width / 2);
+                    palla.Top = Barra.Top - palla.Height;
+                });
+            IProgress<Movimento> rimbalzo = new Progress<Movimento>(
+                valore =>
+                {
+                    //prima versione ma non funzionava bene
+                    //foreach (var blocco in Blocchi)
+                    //{
+                    //    if (palla.Top <= blocco.Bottom || palla.Bottom >= blocco.Top || palla.Top <= 0 || palla.Bottom >= this.ClientSize.Height)
+                    //    {
+                    //        palla_velY *= -1;
+                    //    }
+                    //    else
+                    //    {
+                    //        if (palla.Left <= blocco.Right || palla.Right >= blocco.Left || palla.Left <= 0 || palla.Right >= this.ClientSize.Width)
+                    //        {
+                    //            palla_velX *= -1;
+                    //        }
+                    //    }
+                    //}
+                    int p_d = palla.Right;
+                    int p_s = palla.Left;
+                    int p_so = palla.Bottom;
+                    int p_su = palla.Top;
+                    palla.Top -= palla_velY;
+                    palla.Left += palla_velX;
+
+                    if (palla.Left <= 0 || palla.Right >= this.ClientSize.Width)
+                        palla_velX *= -1;
+
+                    if (palla.Top <= 0)
+                        palla_velY *= -1;
+                    else if (palla.Bottom >= this.ClientSize.Height)
+                        game_over = true;
+
+                    foreach (var blocco in Blocchi)
+                    {
+                        if (!blocco.Visible) continue;
+                        if (palla.Right >= blocco.Left && palla.Left <= blocco.Right &&
+                            palla.Bottom >= blocco.Top && palla.Top <= blocco.Bottom)
+                        {
+                            if (p_d <= blocco.Left || p_s >= blocco.Right)
+                                palla_velX *= -1;
+                            else
+                                palla_velY *= -1;
+                            blocco.Visible = false;
+                            break;
+                        }
+                    }
+
+                    if (palla.Right >= Barra.Left && palla.Left <= Barra.Right &&
+                        palla.Bottom >= Barra.Top && palla.Top <= Barra.Bottom)
+                    {
+                        if (p_so <= Barra.Top)
+                            palla_velY *= -1;
+                    }
+                });
+            var task = Task.Run(() =>
+            {
+                while (keys != Keys.Space && !token.IsCancellationRequested)
+                {
+                    segue.Report(new Movimento(speed, speed, speed, speed));
+                    Task.Delay(10).Wait();
+                }
+            }).ContinueWith(t =>
+            {
+                while (!game_over && !token.IsCancellationRequested)
+                {
+                    rimbalzo.Report(new Movimento(speed, speed, speed, speed));
+                    Task.Delay(10).Wait();
+                }
+            }).ContinueWith(t =>
+            {
+                if (game_over && !token.IsCancellationRequested)
+                {
+                    MessageBox.Show("Game Over!");
+                    SchermataIniziale();
+                }
+                else
+                {
+                    MessageBox.Show("Hai vinto!");
+                    SchermataIniziale();
+                }
+            }, TaskScheduler.FromCurrentSynchronizationContext());
+        }
+        CancellationTokenSource barraCTS;
         private void Barra_Movimento()
         {
+            if (barraCTS != null)
+            {
+                barraCTS.Cancel();
+                barraCTS.Dispose();
+            }
+            barraCTS = new CancellationTokenSource();
+            var token = barraCTS.Token;
 
             Barra.Left = (this.ClientSize.Width - Barra.Width) / 2;
             Barra.Visible = true;
-            IProgress<Movimento> progress = new Progress<Movimento>(
+            IProgress<Movimento> movimento = new Progress<Movimento>(
                 valore =>
                 {
                     if (keys == Keys.Left && Barra.Left > 0)
-                    {
                         Barra.Left -= speed;
-                    }
                     else if (keys == Keys.Right && Barra.Right < this.ClientSize.Width)
-                    {
                         Barra.Left += speed;
-                    }
-                }
-            );
+                });
+
             var task = Task.Run(() =>
             {
-                while (true)
+                while (!token.IsCancellationRequested)
                 {
-                    progress.Report(new Movimento(speed, speed, 0, 0));
-                    Task.Delay(10).Wait();
-                }
-            });
-        }
-        private void Pallina()
-        {
-            palla.Left = (this.ClientSize.Width - Barra.Width) / 2;
-            palla.Visible = true;
-            IProgress<Movimento> progress = new Progress<Movimento>(
-                valore =>
-                {
-                    palla.Left -= speed;
-                }
-            );
-            var task = Task.Run(() =>
-            {
-                while (true)
-                {
-                    progress.Report(new Movimento(speed, speed, 0, 0));
+                    movimento.Report(new Movimento(speed, speed, 0, 0));
                     Task.Delay(10).Wait();
                 }
             });
@@ -124,6 +215,7 @@ namespace Arkanoid
                 bo1, bo2, bo3, bo4, bo5, bo6, bo7, bo8, bo9, bo10, bo11,
                 bn1, bn2, bn3, bn4, bn5, bn6, bn7, bn8, bn9, bn10, bn11
             };
+            int direzione = rnd.Next(1, 2);
             InizializzaBLocchi(false);
             SchermataIniziale();
         }
@@ -132,12 +224,13 @@ namespace Arkanoid
             if (logo != null)
             {
                 this.Controls.Remove(logo);
+                logo = null;
                 single_p.Visible = false;
                 Barra_Movimento();
-                Pallina();
                 RandomColor();
                 InizializzaBLocchi(true);
-
+                palla.Visible = true;
+                Pallina_Movimento();
             }
         }
         private void button1_KeyDown(object sender, KeyEventArgs e)

@@ -225,11 +225,11 @@
             // single_p
             // 
             single_p.ForeColor = Color.Black;
-            single_p.Location = new Point(427, 507);
+            single_p.Location = new Point(431, 514);
             single_p.Name = "single_p";
-            single_p.Size = new Size(75, 23);
+            single_p.Size = new Size(93, 23);
             single_p.TabIndex = 1;
-            single_p.Text = "Start";
+            single_p.Text = "Single Player";
             single_p.UseVisualStyleBackColor = true;
             single_p.Click += button1_Click;
             single_p.KeyDown += button1_KeyDown;
@@ -238,7 +238,7 @@
             // palla
             // 
             palla.Image = Properties.Resources.pallina;
-            palla.Location = new Point(465, 330);
+            palla.Location = new Point(459, 435);
             palla.Name = "palla";
             palla.Size = new Size(14, 14);
             palla.SizeMode = PictureBoxSizeMode.AutoSize;
