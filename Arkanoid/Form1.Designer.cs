@@ -119,6 +119,9 @@
             bc9 = new PictureBox();
             bc10 = new PictureBox();
             bc11 = new PictureBox();
+            punteggio = new Label();
+            Combat = new Button();
+            Comandi = new Button();
             ((System.ComponentModel.ISupportInitialize)Barra).BeginInit();
             ((System.ComponentModel.ISupportInitialize)palla).BeginInit();
             ((System.ComponentModel.ISupportInitialize)b11).BeginInit();
@@ -225,7 +228,7 @@
             // single_p
             // 
             single_p.ForeColor = Color.Black;
-            single_p.Location = new Point(431, 514);
+            single_p.Location = new Point(325, 512);
             single_p.Name = "single_p";
             single_p.Size = new Size(93, 23);
             single_p.TabIndex = 1;
@@ -1126,11 +1129,47 @@
             bc11.TabIndex = 48;
             bc11.TabStop = false;
             // 
+            // punteggio
+            // 
+            punteggio.BackColor = Color.Black;
+            punteggio.Font = new Font("Segoe UI Semibold", 10F);
+            punteggio.ForeColor = Color.White;
+            punteggio.Location = new Point(12, 9);
+            punteggio.Name = "punteggio";
+            punteggio.Size = new Size(121, 20);
+            punteggio.TabIndex = 92;
+            punteggio.Text = "Punteggio:";
+            punteggio.TextAlign = ContentAlignment.MiddleLeft;
+            punteggio.Visible = false;
+            // 
+            // Combat
+            // 
+            Combat.ForeColor = Color.Black;
+            Combat.Location = new Point(424, 512);
+            Combat.Name = "Combat";
+            Combat.Size = new Size(93, 23);
+            Combat.TabIndex = 93;
+            Combat.Text = "1v1";
+            Combat.UseVisualStyleBackColor = true;
+            // 
+            // Comandi
+            // 
+            Comandi.Location = new Point(523, 512);
+            Comandi.Name = "Comandi";
+            Comandi.Size = new Size(75, 23);
+            Comandi.TabIndex = 94;
+            Comandi.Text = "Comandi";
+            Comandi.UseVisualStyleBackColor = true;
+            Comandi.Click += Comandi_Click;
+            // 
             // Form1
             // 
             AutoScaleMode = AutoScaleMode.None;
             BackColor = Color.Orange;
             ClientSize = new Size(964, 581);
+            Controls.Add(Comandi);
+            Controls.Add(Combat);
+            Controls.Add(punteggio);
             Controls.Add(bn1);
             Controls.Add(bn2);
             Controls.Add(bn3);
@@ -1419,5 +1458,8 @@
         private PictureBox bc9;
         private PictureBox bc10;
         private PictureBox bc11;
+        private Label punteggio;
+        private Button Combat;
+        private Button Comandi;
     }
 }

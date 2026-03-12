@@ -10,6 +10,7 @@ namespace Arkanoid
          * blocco rosso vale 20 punti
          * blocco verde vale 25 punti
          */
+        public int punteggio_totale = 0;
         public int palla_velY = 2;
         public int palla_velX = 2;
         public int speed = 3;
@@ -29,27 +30,30 @@ namespace Arkanoid
                 pictureBox.Visible = stato;
             }
         }
+        static Image img_blu = Resources.b_blu;
+        static Image img_giallo = Resources.b_giallo;
+        static Image img_rosso = Resources.b_rosso;
+        static Image img_verde = Resources.b_verde;
         public void RandomColor()
         {
             int Colore;
             foreach (PictureBox pictureBox in Blocchi)
             {
                 Colore = rnd.Next(1, 23);
-                if (Colore >= 1 && Colore <= 9) pictureBox.Image = Resources.b_blu;
-                else if (Colore > 9 && Colore <= 15) pictureBox.Image = Resources.b_giallo;
-                else if (Colore > 15 && Colore <= 19) pictureBox.Image = Resources.b_rosso;
-                else if (Colore > 19) pictureBox.Image = Resources.b_verde;
+                if (Colore >= 1 && Colore <= 9) pictureBox.Image = img_blu;
+                else if (Colore > 9 && Colore <= 15) pictureBox.Image = img_giallo;
+                else if (Colore > 15 && Colore <= 19) pictureBox.Image = img_rosso;
+                else if (Colore > 19) pictureBox.Image = img_verde;
             }
         }
-        public int PuntiBlocco(PictureBox pictureBox)
-        {
-            int punti = 0;
-            if (pictureBox.Image == Resources.b_blu) punti = 13;
-            if (pictureBox.Image == Resources.b_giallo) punti = 17;
-            if (pictureBox.Image == Resources.b_rosso) punti = 20;
-            if (pictureBox.Image == Resources.b_verde) punti = 25;
 
-            return punti;
+        public int PuntoBlocco(PictureBox pictureBox)
+        {
+            if (pictureBox.Image == img_blu) return 13;
+            if (pictureBox.Image == img_giallo) return 17;
+            if (pictureBox.Image == img_rosso) return 20;
+            if (pictureBox.Image == img_verde) return 25;
+            return 0;
         }
 
         private void SchermataIniziale()
@@ -67,7 +71,14 @@ namespace Arkanoid
             palla.Visible = false;
             InizializzaBLocchi(false);
             single_p.Visible = true;
+            punteggio.Visible = false;
             game_over = false;
+            Comandi.Visible = true;
+            Combat.Visible = true;
+        }
+        public void PowerUp()
+        {
+
         }
         public record Movimento(int left, int right, int up, int down);
         CancellationTokenSource pallaCTS;
@@ -127,15 +138,17 @@ namespace Arkanoid
                         if (palla.Right >= blocco.Left && palla.Left <= blocco.Right &&
                             palla.Bottom >= blocco.Top && palla.Top <= blocco.Bottom)
                         {
+                            punteggio_totale += PuntoBlocco(blocco);
+                            punteggio.Text = "Punteggio: " + punteggio_totale;
                             if (p_d <= blocco.Left || p_s >= blocco.Right)
                                 palla_velX *= -1;
                             else
                                 palla_velY *= -1;
                             blocco.Visible = false;
+
                             break;
                         }
                     }
-
                     if (palla.Right >= Barra.Left && palla.Left <= Barra.Right &&
                         palla.Bottom >= Barra.Top && palla.Top <= Barra.Bottom)
                     {
@@ -224,12 +237,16 @@ namespace Arkanoid
             if (logo != null)
             {
                 this.Controls.Remove(logo);
+                Combat.Visible= false;
+                Comandi.Visible = false;
                 logo = null;
                 single_p.Visible = false;
                 Barra_Movimento();
                 RandomColor();
                 InizializzaBLocchi(true);
                 palla.Visible = true;
+                punteggio.Visible = true;
+                punteggio_totale = 0;
                 Pallina_Movimento();
             }
         }
@@ -240,6 +257,14 @@ namespace Arkanoid
         private void button1_KeyUp(object sender, KeyEventArgs e)
         {
             keys = Keys.None;
+        }
+
+        private void Comandi_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Usa le frecce sinistra e destra per muovere la barra," +
+                " premi spazio per far partire la pallina e colpisci i blocchi" +
+                " per guadagnare punti! I blocchi blu valgono 13 punti, i gialli 17, i rossi 20 e i verdi 25." +
+                " Per giocare in 1v1 un player utilizza A e D e l'altro utilizza le frecce sinistra e destra.");
         }
     }
 }
