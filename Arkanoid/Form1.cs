@@ -10,6 +10,7 @@ namespace Arkanoid
          * blocco rosso vale 20 punti
          * blocco verde vale 25 punti
          */
+        CancellationTokenSource source;
         public int punteggio_totale = 0;
         public int palla_velY = 2;
         public int palla_velX = 2;
@@ -17,6 +18,8 @@ namespace Arkanoid
         public bool game_over = false;
         Keys keys;
         PictureBox logo;
+        PictureBox DoublePalla;
+        PictureBox Allungamento;
         List<PictureBox> Blocchi;
         Random rnd = new Random(Environment.TickCount);
         public Form1()
@@ -34,6 +37,7 @@ namespace Arkanoid
         static Image img_giallo = Resources.b_giallo;
         static Image img_rosso = Resources.b_rosso;
         static Image img_verde = Resources.b_verde;
+       
         public void RandomColor()
         {
             int Colore;
@@ -76,8 +80,42 @@ namespace Arkanoid
             Comandi.Visible = true;
             Combat.Visible = true;
         }
+
+        public void RandomPowerUP(PictureBox blocco)
+        {
+            int PowerUp=rnd.Next(1,21);
+            switch(PowerUp)
+            {
+                case 1:
+                    DoublePalla = new PictureBox();
+                    DoublePalla.Image = Resources._2xpalla;
+                    DoublePalla.BackColor = System.Drawing.Color.Transparent;
+                    DoublePalla.SizeMode = PictureBoxSizeMode.AutoSize;
+                    DoublePalla.Top = blocco.Top/2;
+                    DoublePalla.Left = blocco.Left+blocco.Width/2-DoublePalla.Width;
+                    this.Controls.Add(DoublePalla);
+                    break;
+
+                case 2:
+                    Allungamento = new PictureBox();
+                    Allungamento.Image = Resources.allungamento;
+                    Allungamento.BackColor = System.Drawing.Color.Transparent;
+                    Allungamento.SizeMode = PictureBoxSizeMode.AutoSize;
+                    Allungamento.Top = blocco.Top / 2;
+                    Allungamento.Left = blocco.Left + blocco.Width / 2 - Allungamento.Width;
+                    this.Controls.Add(Allungamento);
+                    break;
+                
+            }
+            
+        }
         public void PowerUp()
         {
+            IProgress<Movimento> MovePowerUp = new Progress<Movimento>(value=>
+            {
+                
+            });
+            
 
         }
         public record Movimento(int left, int right, int up, int down);
@@ -234,6 +272,7 @@ namespace Arkanoid
         }
         private void button1_Click(object sender, EventArgs e)
         {
+            
             if (logo != null)
             {
                 this.Controls.Remove(logo);
