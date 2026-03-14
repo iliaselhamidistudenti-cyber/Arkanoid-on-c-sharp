@@ -37,7 +37,7 @@ namespace Arkanoid
         static Image img_giallo = Resources.b_giallo;
         static Image img_rosso = Resources.b_rosso;
         static Image img_verde = Resources.b_verde;
-       
+
         public void RandomColor()
         {
             int Colore;
@@ -81,47 +81,68 @@ namespace Arkanoid
             Combat.Visible = true;
         }
 
-        public void RandomPowerUP(PictureBox blocco)
+        public PictureBox RandomPowerUP(PictureBox blocco)
         {
-            int PowerUp=rnd.Next(1,21);
-            switch(PowerUp)
+            PictureBox pictureBox = new PictureBox();
+            int PowerUp = rnd.Next(1, 21);
+            pictureBox.Visible = false;
+            switch (PowerUp)
             {
-                case 1:
-                    DoublePalla = new PictureBox();
-                    DoublePalla.Image = Resources._2xpalla;
-                    DoublePalla.BackColor = System.Drawing.Color.Transparent;
-                    DoublePalla.SizeMode = PictureBoxSizeMode.AutoSize;
-                    DoublePalla.Top = blocco.Top/2;
-                    DoublePalla.Left = blocco.Left+blocco.Width/2-DoublePalla.Width;
-                    this.Controls.Add(DoublePalla);
+                case 10:
+                    pictureBox = new PictureBox();
+                    pictureBox.Image = Resources._2xpalla;
+                    pictureBox.BackColor = System.Drawing.Color.Transparent;
+                    pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                    pictureBox.Width = blocco.Width;
+                    pictureBox.Height = blocco.Height;
+                    pictureBox.Top = blocco.Top + pictureBox.Height / 2 - pictureBox.Height / 2;
+                    pictureBox.Left = blocco.Left + blocco.Width / 2 - pictureBox.Width / 2;
+                    pictureBox.Visible = true;
+                    this.Controls.Add(pictureBox);
                     break;
-
-                case 2:
-                    Allungamento = new PictureBox();
-                    Allungamento.Image = Resources.allungamento;
-                    Allungamento.BackColor = System.Drawing.Color.Transparent;
-                    Allungamento.SizeMode = PictureBoxSizeMode.AutoSize;
-                    Allungamento.Top = blocco.Top / 2;
-                    Allungamento.Left = blocco.Left + blocco.Width / 2 - Allungamento.Width;
-                    this.Controls.Add(Allungamento);
+                case 5:
+                    pictureBox = new PictureBox();
+                    pictureBox.Image = Resources.allungamento;
+                    pictureBox.BackColor = System.Drawing.Color.Transparent;
+                    pictureBox.SizeMode = PictureBoxSizeMode.StretchImage;
+                    pictureBox.Height = blocco.Height;
+                    pictureBox.Width = blocco.Width;
+                    pictureBox.Top = blocco.Top + pictureBox.Height / 2 - pictureBox.Height / 2;
+                    pictureBox.Left = blocco.Left + blocco.Width / 2 - pictureBox.Width / 2;
+                    pictureBox.Visible = true;
+                    this.Controls.Add(pictureBox);
                     break;
-                
             }
-            
+            return pictureBox;
         }
-        public void PowerUp()
+        public void PowerUpMove(PictureBox powerUp, PictureBox blocco)
         {
-            IProgress<Movimento> MovePowerUp = new Progress<Movimento>(value=>
+            int i = 0;
+            IProgress<int> progress = new Progress<int>(value =>
             {
-                
+                powerUp.Top -= value;
             });
-            
-
+            int speed = 5;
+            powerUp = RandomPowerUP(blocco);
+            var task = Task.Run(() =>
+            {
+                while (powerUp.Bottom > Barra.Top)
+                {
+                    progress.Report(speed);
+                }
+                if (powerUp.Image == Resources.allungamento)
+                {
+                    while (i <= 5000)
+                        Barra.Width *= 2;
+                }
+            });
         }
+
         public record Movimento(int left, int right, int up, int down);
         CancellationTokenSource pallaCTS;
         public void Pallina_Movimento()
         {
+
             if (pallaCTS != null)
             {
                 pallaCTS.Cancel();
@@ -159,6 +180,7 @@ namespace Arkanoid
                     int p_s = palla.Left;
                     int p_so = palla.Bottom;
                     int p_su = palla.Top;
+                    PictureBox PowerUp = new PictureBox();
                     palla.Top -= palla_velY;
                     palla.Left += palla_velX;
 
@@ -178,6 +200,10 @@ namespace Arkanoid
                         {
                             punteggio_totale += PuntoBlocco(blocco);
                             punteggio.Text = "Punteggio: " + punteggio_totale;
+                            PowerUpMove(PowerUp, blocco);
+
+
+
                             if (p_d <= blocco.Left || p_s >= blocco.Right)
                                 palla_velX *= -1;
                             else
@@ -187,13 +213,16 @@ namespace Arkanoid
                             break;
                         }
                     }
+
                     if (palla.Right >= Barra.Left && palla.Left <= Barra.Right &&
                         palla.Bottom >= Barra.Top && palla.Top <= Barra.Bottom)
                     {
                         if (p_so <= Barra.Top)
                             palla_velY *= -1;
                     }
+
                 });
+
             var task = Task.Run(() =>
             {
                 while (keys != Keys.Space && !token.IsCancellationRequested)
@@ -207,6 +236,7 @@ namespace Arkanoid
                 {
                     rimbalzo.Report(new Movimento(speed, speed, speed, speed));
                     Task.Delay(10).Wait();
+
                 }
             }).ContinueWith(t =>
             {
@@ -272,11 +302,11 @@ namespace Arkanoid
         }
         private void button1_Click(object sender, EventArgs e)
         {
-            
+
             if (logo != null)
             {
                 this.Controls.Remove(logo);
-                Combat.Visible= false;
+                Combat.Visible = false;
                 Comandi.Visible = false;
                 logo = null;
                 single_p.Visible = false;
